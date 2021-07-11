@@ -13,19 +13,24 @@
 
 <div align="center">
     <h1>Agora Flat</h1>
-    <p>Project flat is the Web(under development), Windows and macOS client of <a href="https://flat.whiteboard.agora.io/en/">Agora Flat</a> open source classroom.</p>
+    <p>Project flat is the Web, Windows and macOS client of <a href="https://flat.whiteboard.agora.io/en/">Agora Flat</a> open source classroom.</p>
     <p><a href="./README-zh.md">中文</a></p>
     <img src="./assets/flat-showcase-en.png">
 </div>
 
-
 ## Try it now
 
+-   [Start using Flat Web][flat-web]
 -   [Download artifact][flat-homepage]
 -   [Flat Components Storybook][flat-storybook]
 
 ## Features
 
+-   Open sourced front-end and back-end
+    -   [x] [Flat Web][flat-web]
+    -   [x] Flat Desktop ([Windows][flat-homepage] and [macOS][flat-homepage])
+    -   [x] [Flat Android][flat-android]
+    -   [x] [Flat Server][flat-server]
 -   Optimized teaching experience
     -   [x] Big class
     -   [x] Small class
@@ -53,32 +58,23 @@
 
 ## Development
 
-UI and business logic are separated in Flat. You can run flat with [full build](#full-build) or quickly develop UI via [Storybook](#storybook).
-
-## Full Build
-
-Note that full-built Flat requires [Agora Flat Server][flat-server] backend.
-
-### Setup Environment
-
-1. Create two files `config/.env.development.local` and `config/.env.production.local`.
-1. Add environment variables following the `config/.env` format.
-
--   See [Environment Variables Reference](#%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%E5%80%BC%E5%8F%82%E8%80%83) bellow.
--   See [Files under version control](https://github.com/kerimdzhanov/dotenv-flow#files-under-version-control) for more about _.env.\*_ naming.
+UI and business logic are separated in Flat. You can run flat with [development mode](#development-mode) or quickly develop UI via [Storybook](#storybook).
 
 ### Installation
 
-1. <kbd>Fork</kbd> this repo so that Github Actions can work properly.
-2. Then `git clone` the forked repo to local.
-3. At project root：
-    ```shell
-    yarn run bootstrap
-    ```
+At project root:
+
+```shell
+yarn run bootstrap
+```
 
 ### Development Mode
 
-Run `yarn start` at project root.
+At project root:
+
+```shell
+yarn run start
+```
 
 ### Package Executable
 
@@ -110,8 +106,10 @@ Many Flat components UI can be quickly viewed and developed via Storybook ([Onli
 | WINDOWS_CODE_SIGNING_CA_PATH         | Windows Code Signing CA file path. Skip if not provided  | Relative to `desktop/main-app`                                                      |
 | WINDOWS_CODE_SIGNING_CA_PASSWORD     | Windows Code Signing CA password. Skip if not provided   |                                                                                     |
 
-[flat-homepage]: https://flat.whiteboard.agora.io/
+[flat-homepage]: https://flat.whiteboard.agora.io/en/#download
+[flat-web]: https://flat-web.whiteboard.agora.io/
 [flat-server]: https://github.com/netless-io/flat-server
+[flat-android]: https://github.com/netless-io/flat-android
 [flat-storybook]: https://netless-io.github.io/flat/storybook/
 [open-wechat]: https://open.weixin.qq.com/
 [netless-auth]: https://docs.agora.io/en/whiteboard/generate_whiteboard_token_at_app_server?platform=RESTful

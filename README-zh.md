@@ -13,17 +13,23 @@
 
 <div align="center">
     <h1>Agora Flat</h1>
-    <p>项目 flat 是 <a href="https://flat.whiteboard.agora.io/">Agora Flat</a> 开源教室的 Web 端（开发中）、Windows 客户端与 macOS 客户端。</p>
+    <p>项目 flat 是 <a href="https://flat.whiteboard.agora.io/">Agora Flat</a> 开源教室的 Web 端、Windows 客户端与 macOS 客户端。</p>
     <img src="./assets/flat-showcase.png">
 </div>
 
 ## 产品体验
 
--   [下载地址][flat-homepage]
+-   [快速体验 Flat Web][flat-web]
+-   [APP 下载地址][flat-homepage]
 -   [Flat 组件库 Storybook][flat-storybook]
 
 ## 特性
 
+-   前后端完全开源
+    -   [x] [Flat Web][flat-web]
+    -   [x] Flat 桌面端（[Windows][flat-homepage] 与 [macOS][flat-homepage]）
+    -   [x] [Flat Android][flat-android]
+    -   [x] [Flat Server][flat-server] 服务器
 -   多场景课堂
     -   [x] 大班课
     -   [x] 小班课
@@ -51,31 +57,23 @@
 
 ## 本地开发
 
-在 Flat 中 UI 逻辑与业务逻辑分开开发。可通过[完整配置](#%E5%AE%8C%E6%95%B4%E8%B7%91%E8%B5%B7%E9%A1%B9%E7%9B%AE)跑起项目，也可以通过 [Storybook](#storybook) 快速查看与开发部分 UI。
-
-## 完整跑起项目
-
-注意完整跑起项目需要配合 [Agora Flat Server][flat-server] 后端运行。
-
-### 配置环境变量
-
-1. 创建两个文件 `config/.env.development.local` 和 `config/.env.production.local`。
-2. 按照文件 `config/.env` 的格式添加环境变量。
-
--   环境变量值可参考下方: [环境变量值参考](#%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%E5%80%BC%E5%8F%82%E8%80%83)。
--   关于 _.env.\*_ 命名规范可参看: [Files under version control](https://github.com/kerimdzhanov/dotenv-flow#files-under-version-control)
+在 Flat 中 UI 逻辑与业务逻辑分开开发。可通过 [开发模式](#开发模式) 跑起项目，也可以通过 [Storybook](#storybook) 快速查看与开发部分 UI。
 
 ### 安装
 
-1. 因涉及到 Github Action 等配置，请先右上方 <kbd>Fork</kbd> 此项目，然后再 `git clone` fork 出来的项目克隆到本地。
-2. 在项目根目录执行：
-    ```shell
-    yarn run bootstrap
-    ```
+在项目根目录执行：
+
+```shell
+yarn run bootstrap
+```
 
 ### 开发模式
 
-项目根执行 `yarn start` 即可。
+在项目根目录执行：
+
+```shell
+yarn run start
+```
 
 ### 打包可执行文件
 
@@ -107,8 +105,10 @@
 | WINDOWS_CODE_SIGNING_CA_PATH         | Windows 签名证书文件路径，可选，留空时不做签名     | 相对路径，相对于 `desktop/main-app` 目录                         |
 | WINDOWS_CODE_SIGNING_CA_PASSWORD     | Windows 签名证书密码，可选，留空时不做签名         |                                                                  |
 
-[flat-homepage]: https://flat.whiteboard.agora.io/
+[flat-homepage]: https://flat.whiteboard.agora.io/#download
+[flat-web]: https://flat-web.whiteboard.agora.io/
 [flat-server]: https://github.com/netless-io/flat-server
+[flat-android]: https://github.com/netless-io/flat-android
 [flat-storybook]: https://netless-io.github.io/flat/storybook/
 [open-wechat]: https://open.weixin.qq.com/
 [netless-auth]: https://docs.agora.io/cn/whiteboard/generate_whiteboard_token_at_app_server?platform=RESTful
