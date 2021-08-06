@@ -26,11 +26,13 @@ import {
     renameFile,
 } from "../../apiMiddleware/flatServer/storage";
 import { errorTips } from "../../components/Tips/ErrorTips";
+import { INVITE_BASEURL } from "../../constants/Process";
+import { coursewarePreloader } from "../../utils/CoursewarePreloader";
 import { getUploadTaskManager } from "../../utils/UploadTaskManager";
 import { UploadStatusType, UploadTask } from "../../utils/UploadTaskManager/UploadTask";
 
 export type CloudStorageFile = CloudStorageFileUI &
-    Pick<CloudFile, "fileURL" | "taskUUID" | "taskToken">;
+    Pick<CloudFile, "fileURL" | "taskUUID" | "taskToken" | "region">;
 
 export type FileMenusKey = "download" | "rename" | "delete";
 
@@ -357,6 +359,18 @@ export class CloudStorageStore extends CloudStorageStoreBase {
     }
 
     private previewCourseware(file: CloudStorageFile): void {
+        const { fileURL, taskToken, taskUUID, region } = file;
+
+        const convertFileTypeList = [".pptx", ".ppt", ".pdf", ".doc", ".docx"];
+
+        const isConvertFileType = convertFileTypeList.some(type => fileURL.includes(type));
+
+        const encodeFileURL = encodeURIComponent(fileURL);
+
+        const resourcePreviewURL = isConvertFileType
+            ? `${INVITE_BASEURL}/preview/${encodeFileURL}/${taskToken}/${taskUUID}/${region}/`
+            : `${INVITE_BASEURL}/preview/${encodeFileURL}/`;
+
         switch (file.convert) {
             case "converting": {
                 Modal.info({ content: this.i18n.t("please-wait-while-the-lesson-is-transcoded") });
@@ -367,10 +381,7 @@ export class CloudStorageStore extends CloudStorageStoreBase {
                 return;
             }
             default: {
-                // @TODO preview courseware
-                Modal.info({
-                    content: this.i18n.t("please-go-to-the-room-to-view-the-courseware"),
-                });
+                window.open(resourcePreviewURL, "_blank");
             }
         }
     }
@@ -504,12 +515,14 @@ export class CloudStorageStore extends CloudStorageStoreBase {
         }
 
         let status: ConvertingTaskStatus["status"];
+        let progress: ConvertingTaskStatus["progress"];
 
         try {
-            ({ status } = await queryConvertingTaskStatus({
+            ({ status, progress } = await queryConvertingTaskStatus({
                 taskToken: file.taskToken,
                 taskUUID: file.taskUUID,
                 dynamic,
+                region: file.region,
             }));
         } catch (e) {
             console.error(e);
@@ -522,7 +535,7 @@ export class CloudStorageStore extends CloudStorageStoreBase {
             }
 
             try {
-                await convertFinish({ fileUUID: file.fileUUID });
+                await convertFinish({ fileUUID: file.fileUUID, region: file.region });
             } catch (e) {
                 // ignore error when notifying server finish status
                 console.warn(e);
@@ -531,6 +544,13 @@ export class CloudStorageStore extends CloudStorageStoreBase {
             runInAction(() => {
                 file.convert = status === "Fail" ? "error" : "success";
             });
+
+            if (status === "Finished") {
+                const src = progress?.convertedFileList?.[0].conversionFileUrl;
+                if (src) {
+                    void coursewarePreloader.preload(src).catch(error => console.warn(error));
+                }
+            }
 
             return;
         }

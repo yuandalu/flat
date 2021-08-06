@@ -1,5 +1,6 @@
 /* eslint-disable no-redeclare */
 import { makeAutoObservable, observable, runInAction } from "mobx";
+import { Region } from "flat-components";
 import {
     cancelRoom,
     CancelRoomPayload,
@@ -21,6 +22,7 @@ import {
 } from "../apiMiddleware/flatServer";
 import { RoomDoc, RoomStatus, RoomType } from "../apiMiddleware/flatServer/constants";
 import { globalStore } from "./GlobalStore";
+import { configStore } from "./ConfigStore";
 
 // Sometime we may only have pieces of the room info
 /** Ordinary room + periodic sub-room */
@@ -39,6 +41,8 @@ export interface RoomItem {
     title?: string;
     /** 房间状态 */
     roomStatus?: RoomStatus;
+    /** 区域 */
+    region?: Region;
     /** 房间开始时间 */
     beginTime?: number;
     /** 结束时间 */
@@ -89,6 +93,7 @@ export class RoomStore {
         }
 
         const roomUUID = await createOrdinaryRoom(payload);
+        configStore.setRegion(payload.region);
         const { docs, ...restPayload } = payload;
         this.updateRoom(roomUUID, globalStore.userUUID, {
             ...restPayload,
@@ -102,6 +107,7 @@ export class RoomStore {
 
     public async createPeriodicRoom(payload: CreatePeriodicRoomPayload): Promise<void> {
         await createPeriodicRoom(payload);
+        configStore.setRegion(payload.region);
         // need roomUUID and periodicUUID from server to cache the payload
     }
 
@@ -173,6 +179,7 @@ export class RoomStore {
             recordInfo: recordings,
             whiteboardRoomToken,
             whiteboardRoomUUID,
+            region,
             rtmToken,
         } = roomInfo;
         this.updateRoom(roomUUID, ownerUUID, {
@@ -180,11 +187,13 @@ export class RoomStore {
             roomType,
             recordings,
             roomUUID,
+            region,
         });
         globalStore.updateToken({
             whiteboardRoomToken,
             whiteboardRoomUUID,
             rtmToken,
+            region,
         });
     }
 

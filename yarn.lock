@@ -1968,15 +1968,10 @@
   resolved "https://registry.npmjs.org/@netless/tool-box/-/tool-box-0.1.5.tgz#39977a0075c069aab90895bcee6268a8e6bf8afd"
   integrity sha512-eoIyRdnVDnNosMZ1Jix6bVkg6Fc0Pg0UzgR9fLuB2dZaaeBDbmC82fOd3rRQiG+PNM0hBhT6vfJ1iE1tw7Juzg==
 
-"@netless/white-audio-plugin@^2.0.3":
-  version "2.0.3"
-  resolved "https://registry.npmjs.org/@netless/white-audio-plugin/-/white-audio-plugin-2.0.3.tgz#f5edb6f8d32ece49ac023bcf6bc01458db50aca8"
-  integrity sha512-RAMmTzdGpVC5KC5sJd2FRLj/fslIeSkJ1BY3vBk3X6U11j/2uCE95G4W4e+tIocQgbWgIwEBsSIW60Dxbx65Jg==
-
-"@netless/white-video-plugin@^2.0.3":
-  version "2.0.3"
-  resolved "https://registry.npmjs.org/@netless/white-video-plugin/-/white-video-plugin-2.0.3.tgz#7502979430dd28a8982b8d630e2b1b457a8a1074"
-  integrity sha512-kXIavQ2192EHiY8M4almndWhGnhDAyXqjTIrZvXhjslaQp1FUfKvmSy3AjNcGU+sjVCKBKmkoYVc2PeUx0Ho1g==
+"@netless/video-js-plugin@^0.3.6":
+  version "0.3.6"
+  resolved "https://registry.npmjs.org/@netless/video-js-plugin/-/video-js-plugin-0.3.6.tgz#46cc8f4a23a7673e9cf4ca96820130aee2f8b781"
+  integrity sha512-ivdmYr6bGz/4BlQgCCgb8Hw5V4ImngCCIZq0LqJwQaJAhSwyai1KqokVeIPa7U1V0ve75OckktStDuyMBPoe2Q==
 
 "@netless/zoom-controller@^0.1.1":
   version "0.1.1"
@@ -2899,6 +2894,18 @@
   integrity sha512-nkRRYpKxspH9yiYGSvyfM7GX1m57B9AVMrVEWY7Hlv9ueK2XCu39M5QyBTDHXcj5qixdD+MyAmNgoy2dEDxGLQ==
   dependencies:
     "@types/react" "*"
+
+"@types/lodash-es@^4.17.4":
+  version "4.17.4"
+  resolved "https://registry.npmjs.org/@types/lodash-es/-/lodash-es-4.17.4.tgz#b2e440d2bf8a93584a9fd798452ec497986c9b97"
+  integrity sha512-BBz79DCJbD2CVYZH67MBeHZRX++HF+5p8Mo5MzjZi64Wac39S3diedJYHZtScbRVf4DjZyN6LzA0SB0zy+HSSQ==
+  dependencies:
+    "@types/lodash" "*"
+
+"@types/lodash@*":
+  version "4.14.171"
+  resolved "https://registry.npmjs.org/@types/lodash/-/lodash-4.14.171.tgz#f01b3a5fe3499e34b622c362a46a609fdb23573b"
+  integrity sha512-7eQ2xYLLI/LsicL2nejW9Wyko3lcpN6O/z0ZLHrEQsg280zIdCv1t/0m6UtBjUHokCGBQ3gYTbHzDkZ1xOBwwg==
 
 "@types/lodash@^4.14.167":
   version "4.14.167"
@@ -3862,6 +3869,11 @@
   version "4.2.2"
   resolved "https://registry.npmjs.org/@xtuc/long/-/long-4.2.2.tgz#d291c6a4e97989b5c61d9acf396ae4fe133a718d"
   integrity sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==
+
+"@zip.js/zip.js@^2.3.7":
+  version "2.3.7"
+  resolved "https://registry.npmjs.org/@zip.js/zip.js/-/zip.js-2.3.7.tgz#c1493527fd4a1316ccc8bd507a986a884809476b"
+  integrity sha512-7CAH3iZIy51xld7h3MTI79HAjWvyGZyZUOJ7tX2GXePaVvEb9OxVUAoAKSC19Qlvt6vN+Rhe93OZKqeWmdT8eA==
 
 JSONStream@^1.0.4:
   version "1.3.5"
@@ -8907,7 +8919,7 @@ fs-extra@^9.1.0:
 
 fs-minipass@^2.0.0:
   version "2.1.0"
-  resolved "https://registry.npmjs.org/fs-minipass/-/fs-minipass-2.1.0.tgz#7f5036fdbf12c63c169190cbe4199c852271f9fb"
+  resolved "https://registry.yarnpkg.com/fs-minipass/-/fs-minipass-2.1.0.tgz#7f5036fdbf12c63c169190cbe4199c852271f9fb"
   integrity sha512-V/JgOLFCS+R6Vcq0slCuaeWEdNC3ouDlJMNIsacH2VtALiu9mV4LPrHc5cDl8k5aw6J8jwgWWpiTo5RYhmIzvg==
   dependencies:
     minipass "^3.0.0"
@@ -11511,9 +11523,9 @@ locate-path@^6.0.0:
   dependencies:
     p-locate "^5.0.0"
 
-lodash-es@^4.17.15:
+lodash-es@^4.17.15, lodash-es@^4.17.21:
   version "4.17.21"
-  resolved "https://registry.yarnpkg.com/lodash-es/-/lodash-es-4.17.21.tgz#43e626c46e6591b7750beb2b50117390c609e3ee"
+  resolved "https://registry.npmjs.org/lodash-es/-/lodash-es-4.17.21.tgz#43e626c46e6591b7750beb2b50117390c609e3ee"
   integrity sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw==
 
 lodash.debounce@^4.0.8:
@@ -11761,7 +11773,7 @@ material-colors@^1.2.1:
   resolved "https://registry.yarnpkg.com/material-colors/-/material-colors-1.2.6.tgz#6d1958871126992ceecc72f4bcc4d8f010865f46"
   integrity sha512-6qE4B9deFBIa9YSpOc9O0Sgc43zTeVYbgDT5veRKSlB2+ZuHNoVVxA1L/ckMUayV9Ay9y7Z/SZCLcGteW9i7bg==
 
-mathjs@^6.2.2:
+mathjs@6.6.5:
   version "6.6.5"
   resolved "https://registry.npmjs.org/mathjs/-/mathjs-6.6.5.tgz#6bbad1fa3ac09e8f7106ef64af8d3908f877b8e8"
   integrity sha512-jvRqk7eoEHBcx/lskmy05m+8M7xDHAJcJzRJoqIsqExtlTHPDQO0Zv85g5F0rasDAXF+DLog/70hcqCJijSzPQ==
@@ -12132,7 +12144,7 @@ minipass-pipeline@^1.2.2:
 
 minipass@^3.0.0, minipass@^3.1.1:
   version "3.1.3"
-  resolved "https://registry.npmjs.org/minipass/-/minipass-3.1.3.tgz#7d42ff1f39635482e15f9cdb53184deebd5815fd"
+  resolved "https://registry.yarnpkg.com/minipass/-/minipass-3.1.3.tgz#7d42ff1f39635482e15f9cdb53184deebd5815fd"
   integrity sha512-Mgd2GdMVzY+x3IJ+oHnVM+KG3lA5c8tnabyJKmHSaG2kAGpudxuOf8ToDkhumF7UzME7DecbQE9uOZhNm7PuJg==
   dependencies:
     yallist "^4.0.0"
@@ -17022,9 +17034,9 @@ tar-stream@^1.5.2:
     xtend "^4.0.0"
 
 tar@^6.0.2:
-  version "6.1.0"
-  resolved "https://registry.yarnpkg.com/tar/-/tar-6.1.0.tgz#d1724e9bcc04b977b18d5c573b333a2207229a83"
-  integrity sha512-DUCttfhsnLCjwoDoFcI+B2iJgYa93vBnDUATYEeRx6sntCTdN01VnqsIuTlALXla/LWooNg0yEGeB+Y8WdFxGA==
+  version "6.1.6"
+  resolved "https://registry.yarnpkg.com/tar/-/tar-6.1.6.tgz#c23d797b0a1efe5d479b1490805c5443f3560c5d"
+  integrity sha512-oaWyu5dQbHaYcyZCTfyPpC+VmI62/OM2RTUYavTk1MDr1cwW5Boi3baeYQKiZbY2uSQJGr+iMOzb/JFxLrft+g==
   dependencies:
     chownr "^2.0.0"
     fs-minipass "^2.0.0"
@@ -18472,10 +18484,10 @@ which@^2.0.1, which@^2.0.2:
   dependencies:
     isexe "^2.0.0"
 
-white-web-sdk@2.13.8:
-  version "2.13.8"
-  resolved "https://registry.npmjs.org/white-web-sdk/-/white-web-sdk-2.13.8.tgz#bf5b328b4b8fda657a90bd8be3b3d86add0c93a8"
-  integrity sha512-MwqKclYDa6c3iywDASzioo8kmMZNzeBvXgLWkpVxu6O+InxOKNLOcjkZx8ruNoxGZjzbAiUC78n9O5+AD9jxEw==
+white-web-sdk@2.13.12:
+  version "2.13.12"
+  resolved "https://registry.npmjs.org/white-web-sdk/-/white-web-sdk-2.13.12.tgz#c247d5896f2f502ef51e72d2d13a8764959a7ee8"
+  integrity sha512-IeZCeldJWftR+81+uc/49pItEHEWm7iLxqTWJfAJZ3FvmMcvDmEFB3+kaZH0I3NLlb7CXFXtfre41LLSFs59yw==
   dependencies:
     "@netless/canvas-polyfill" "^0.0.4"
     atob "^2.1.0"
@@ -18483,7 +18495,8 @@ white-web-sdk@2.13.8:
     color "^3.1.0"
     detect-it "^3.0.5"
     es6-symbol "^3.1.1"
-    mathjs "^6.2.2"
+    eventemitter3 "^4.0.7"
+    mathjs "6.6.5"
     mobx "^4.15.7"
     mobx-react "^5.4.4"
     numeric "^1.2.6"

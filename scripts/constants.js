@@ -23,3 +23,4 @@ module.exports.rootPackageJSONPath = rootPackageJSONPath;
 module.exports.mainPackageJSONPath = mainPackageJSONPath;
 
 module.exports.version = version;
+

@@ -1,7 +1,12 @@
+import "video.js/dist/video-js.css";
+
 import CombinePlayerFactory, { CombinePlayer, PublicCombinedStatus } from "@netless/combine-player";
 import { CursorTool } from "@netless/cursor-tool";
-import { audioPlugin } from "@netless/white-audio-plugin";
-import { videoPlugin } from "@netless/white-video-plugin";
+import {
+    PluginId as VideoJsPluginId,
+    videoJsPlugin,
+    PluginContext as VideoJsPluginContext,
+} from "@netless/video-js-plugin";
 import { EventEmitter } from "events";
 import polly from "polly-js";
 import {
@@ -12,6 +17,7 @@ import {
     ReplayRoomParams,
     WhiteWebSdk,
 } from "white-web-sdk";
+import { Region } from "flat-components";
 import { NETLESS, NODE_ENV } from "../constants/Process";
 
 export enum SmartPlayerEventType {
@@ -63,9 +69,9 @@ export class SmartPlayer extends EventEmitter {
     }
 
     public async load({
-        isCreator,
         whiteboardUUID,
         whiteboardRoomToken,
+        region,
         whiteboardEl,
         videoEl,
         recording,
@@ -74,6 +80,7 @@ export class SmartPlayer extends EventEmitter {
         isCreator: boolean;
         whiteboardUUID: string;
         whiteboardRoomToken: string;
+        region?: Region;
         whiteboardEl: HTMLDivElement;
         videoEl: HTMLVideoElement;
         recording?: {
@@ -87,14 +94,14 @@ export class SmartPlayer extends EventEmitter {
         this._isEnded = false;
         this.destroy();
 
-        const plugins = createPlugins({ video: videoPlugin, audio: audioPlugin });
-        const contextIdentity = isCreator ? "host" : "";
-        plugins.setPluginContext("video", { identity: contextIdentity });
-        plugins.setPluginContext("audio", { identity: contextIdentity });
+        const plugins = createPlugins({ [VideoJsPluginId]: videoJsPlugin() });
+        const videoJsPluginContext: Partial<VideoJsPluginContext> = { verbose: true };
+        plugins.setPluginContext(VideoJsPluginId, videoJsPluginContext);
 
         const whiteWebSdk = new WhiteWebSdk({
             appIdentifier: NETLESS.APP_IDENTIFIER,
             plugins: plugins,
+            region,
         });
 
         this.whiteWebSdk = whiteWebSdk;
@@ -125,6 +132,7 @@ export class SmartPlayer extends EventEmitter {
             room: whiteboardUUID,
             roomToken: whiteboardRoomToken,
             cursorAdapter: cursorAdapter,
+            region,
         };
 
         if (recording) {

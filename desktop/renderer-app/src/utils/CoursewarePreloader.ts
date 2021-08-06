@@ -11,18 +11,40 @@ function getCoursewareDir(taskUUID: string, taskType: TaskType): string {
     return path.join(runtime.downloadsDirectory, `${taskType}Convert`, taskUUID);
 }
 
+type PPTInfo = {
+    baseURL: string;
+    taskType: TaskType;
+    taskUUID: string;
+};
+
 /**
  * Preload courseware
  */
 class CoursewarePreloader {
     public downloaders = new Map<TaskUUID, DownloaderHelper>();
 
-    public async preload(taskUUID: string, taskType: TaskType): Promise<void> {
+    public parsePPTURLInfo(pptSrc: string): PPTInfo {
+        const pptFiles = /^(\S+)\/(static|dynamic)Convert\/([0-9a-f]{32})\//.exec(pptSrc);
+        if (!pptFiles) {
+            throw new Error("parse ppt url failed.");
+        }
+        const [, baseURL, taskType, taskUUID] = pptFiles;
+
+        return {
+            baseURL: baseURL.replace(/^pptx:\/\//, "https://"),
+            taskType: taskType as TaskType,
+            taskUUID,
+        };
+    }
+
+    public async preload(pptSrc: string): Promise<void> {
+        const { baseURL, taskType, taskUUID } = this.parsePPTURLInfo(pptSrc);
+
         if (this.downloaders.has(taskUUID) || (await this.has(taskUUID, taskType))) {
             return;
         }
 
-        const url = `https://convertcdn.netless.link/${taskType}Convert/${taskUUID}.zip`;
+        const url = `${baseURL}/${taskType}Convert/${taskUUID}.zip`;
         const coursewareDir = getCoursewareDir(taskUUID, taskType);
         const tempCoursewareDir = path.join(coursewareDir, taskUUID);
 
@@ -45,8 +67,13 @@ class CoursewarePreloader {
         downloader.once("end", async info => {
             try {
                 await extractZIP(info.filePath, coursewareDir);
-                await copy(tempCoursewareDir, coursewareDir);
-                await remove(tempCoursewareDir);
+                // TODO: the convert service may fail in some cases, which
+                //       results in incorrect zip structure.
+                //       when it occurs, we manually correct it by code below.
+                if (await pathExists(tempCoursewareDir)) {
+                    await copy(tempCoursewareDir, coursewareDir);
+                    await remove(tempCoursewareDir);
+                }
                 await remove(info.filePath);
             } catch (e) {
                 console.error(e);
@@ -55,6 +82,7 @@ class CoursewarePreloader {
                 console.log("downloaded", info.filePath);
             }
             this.downloaders.delete(taskUUID);
+
             if (process.env.NODE_ENV === "development") {
                 console.log("[preloader] download complete", coursewareDir);
             }

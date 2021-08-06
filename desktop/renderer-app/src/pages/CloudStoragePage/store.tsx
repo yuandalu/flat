@@ -1,3 +1,6 @@
+import "./store.less";
+import closeSVG from "./image/close.svg";
+
 import { Modal } from "antd";
 import {
     CloudStorageConvertStatusType,
@@ -29,9 +32,10 @@ import { errorTips } from "../../components/Tips/ErrorTips";
 import { getCoursewarePreloader } from "../../utils/CoursewarePreloader";
 import { getUploadTaskManager } from "../../utils/UploadTaskManager";
 import { UploadStatusType, UploadTask } from "../../utils/UploadTaskManager/UploadTask";
+import { fileInfo, ResourcePreview } from "./CloudStorageFilePreview";
 
 export type CloudStorageFile = CloudStorageFileUI &
-    Pick<CloudFile, "fileURL" | "taskUUID" | "taskToken">;
+    Pick<CloudFile, "fileURL" | "taskUUID" | "taskToken" | "region">;
 
 export type FileMenusKey = "download" | "rename" | "delete";
 
@@ -133,7 +137,7 @@ export class CloudStorageStore extends CloudStorageStoreBase {
                 break;
             }
             case "delete": {
-                Modal.confirm({
+                Modal.info({
                     content: this.i18n.t("delete-courseware-tips"),
                     onOk: () => this.removeFiles([fileUUID]),
                 });
@@ -358,6 +362,13 @@ export class CloudStorageStore extends CloudStorageStoreBase {
     }
 
     private previewCourseware(file: CloudStorageFile): void {
+        const fileInfo: fileInfo = {
+            fileURL: file.fileURL,
+            taskUUID: file.taskUUID,
+            taskToken: file.taskToken,
+            region: file.region,
+        };
+
         switch (file.convert) {
             case "converting": {
                 Modal.info({ content: this.i18n.t("please-wait-while-the-lesson-is-transcoded") });
@@ -368,9 +379,14 @@ export class CloudStorageStore extends CloudStorageStoreBase {
                 return;
             }
             default: {
-                // @TODO preview courseware
                 Modal.info({
-                    content: this.i18n.t("please-go-to-the-room-to-view-the-courseware"),
+                    content: <ResourcePreview fileInfo={fileInfo} />,
+                    className: "resource-preview-container",
+                    width: "100%",
+                    centered: true,
+                    closable: true,
+                    maskClosable: true,
+                    closeIcon: <img src={closeSVG} />,
                 });
             }
         }
@@ -505,12 +521,14 @@ export class CloudStorageStore extends CloudStorageStoreBase {
         }
 
         let status: ConvertingTaskStatus["status"];
+        let progress: ConvertingTaskStatus["progress"];
 
         try {
-            ({ status } = await queryConvertingTaskStatus({
+            ({ status, progress } = await queryConvertingTaskStatus({
                 taskToken: file.taskToken,
                 taskUUID: file.taskUUID,
                 dynamic,
+                region: file.region,
             }));
         } catch (e) {
             console.error(e);
@@ -523,7 +541,7 @@ export class CloudStorageStore extends CloudStorageStoreBase {
             }
 
             try {
-                await convertFinish({ fileUUID: file.fileUUID });
+                await convertFinish({ fileUUID: file.fileUUID, region: file.region });
             } catch (e) {
                 // ignore error when notifying server finish status
                 console.warn(e);
@@ -534,10 +552,12 @@ export class CloudStorageStore extends CloudStorageStoreBase {
             });
 
             if (status === "Finished") {
-                void getCoursewarePreloader().preload(
-                    file.taskUUID,
-                    dynamic ? "dynamic" : "static",
-                );
+                const src = progress?.convertedFileList?.[0].conversionFileUrl;
+                if (src) {
+                    void getCoursewarePreloader()
+                        .preload(src)
+                        .catch(error => console.warn(error));
+                }
             }
 
             return;

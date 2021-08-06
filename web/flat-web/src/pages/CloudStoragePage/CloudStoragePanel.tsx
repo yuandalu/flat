@@ -12,6 +12,8 @@ import { useIsomorphicLayoutEffect } from "react-use";
 import { RoomPhase, SceneDefinition } from "white-web-sdk";
 import { CloudStorageContainer } from "flat-components";
 import { useTranslation } from "react-i18next";
+import { RequestErrorCode } from "../../constants/ErrorCode";
+import { ServerRequestError } from "../../utils/error/ServerRequestError";
 
 export interface CloudStoragePanelProps {
     whiteboard?: WhiteboardStore;
@@ -38,11 +40,11 @@ export const CloudStoragePanel = observer<CloudStoragePanelProps>(function Cloud
 
     async function insertCourseware(file: CloudStorageFile): Promise<void> {
         if (file.convert === "converting") {
-            void message.warn(t('in-the-process-of-transcoding-tips'));
+            void message.warn(t("in-the-process-of-transcoding-tips"));
             return;
         }
 
-        void message.info(t('Inserting-courseware-tips'));
+        void message.info(t("Inserting-courseware-tips"));
 
         const ext = (/\.[^.]+$/.exec(file.fileName) || [""])[0].toLowerCase();
         switch (ext) {
@@ -87,6 +89,7 @@ export const CloudStoragePanel = observer<CloudStoragePanelProps>(function Cloud
             return;
         }
 
+        // shrink the image a little to fit the screen
         const maxWidth = window.innerWidth * 0.8;
         const maxHeight = window.innerHeight * 0.8;
 
@@ -113,8 +116,7 @@ export const CloudStoragePanel = observer<CloudStoragePanelProps>(function Cloud
         const uuid = v4uuid();
         room.insertImage({
             uuid,
-            centerX: 0,
-            centerY: 0,
+            ...room.state.cameraState,
             width: Math.floor(width * scale),
             height: Math.floor(height * scale),
             locked: false,
@@ -128,14 +130,13 @@ export const CloudStoragePanel = observer<CloudStoragePanelProps>(function Cloud
             return;
         }
 
-        room.insertPlugin("audio", {
+        room.insertPlugin("video.js", {
             originX: -240,
             originY: -43,
             width: 480,
             height: 86,
             attributes: { src: file.fileURL },
         });
-        console.log("[cloud storage] does not support audio yet");
     }
 
     function insertVideo(file: CloudStorageFile): void {
@@ -144,7 +145,7 @@ export const CloudStoragePanel = observer<CloudStoragePanelProps>(function Cloud
             return;
         }
 
-        room.insertPlugin("video", {
+        room.insertPlugin("video.js", {
             originX: -240,
             originY: -135,
             width: 480,
@@ -159,23 +160,39 @@ export const CloudStoragePanel = observer<CloudStoragePanelProps>(function Cloud
             return;
         }
 
-        const { taskUUID, taskToken } = file;
+        const { taskUUID, taskToken, region } = file;
         const dynamic = ext === ".pptx";
-        const convertingStatus = await queryConvertingTaskStatus({ taskUUID, taskToken, dynamic });
+        const convertingStatus = await queryConvertingTaskStatus({
+            taskUUID,
+            taskToken,
+            dynamic,
+            region,
+        });
 
         if (file.convert !== "success") {
             if (convertingStatus.status === "Finished" || convertingStatus.status === "Fail") {
                 try {
-                    await convertFinish({ fileUUID: file.fileUUID });
+                    await convertFinish({ fileUUID: file.fileUUID, region: file.region });
                 } catch (e) {
-                    console.error(e);
+                    if (
+                        e instanceof ServerRequestError &&
+                        e.errorCode === RequestErrorCode.FileIsConverted
+                    ) {
+                        // ignore this error
+                        // there's another `convertFinish()` call in ./store.tsx
+                        // we call this api in two places to make sure the file is correctly converted (in server)
+                    } else {
+                        console.error(e);
+                    }
                 }
                 if (convertingStatus.status === "Fail") {
-                    void message.error(t("transcoding-failure-reason", { reason: convertingStatus.failedReason }));
+                    void message.error(
+                        t("transcoding-failure-reason", { reason: convertingStatus.failedReason }),
+                    );
                 }
             } else {
                 message.destroy();
-                void message.warn(t('in-the-process-of-transcoding-tips'));
+                void message.warn(t("in-the-process-of-transcoding-tips"));
                 return;
             }
         } else if (convertingStatus.status === "Finished" && convertingStatus.progress) {
@@ -197,7 +214,7 @@ export const CloudStoragePanel = observer<CloudStoragePanelProps>(function Cloud
                 room.scalePptToFit();
             }
         } else {
-            void message.error(t('unable-to-insert-courseware'));
+            void message.error(t("unable-to-insert-courseware"));
         }
     }
 });

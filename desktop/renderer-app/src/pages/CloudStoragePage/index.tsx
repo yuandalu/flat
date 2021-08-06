@@ -1,4 +1,5 @@
 import "./style.less";
+
 import { message } from "antd";
 import { v4 as v4uuid } from "uuid";
 import { CloudStorageContainer } from "flat-components";
@@ -12,6 +13,8 @@ import { useIsomorphicLayoutEffect } from "react-use";
 import { MainPageLayoutContainer } from "../../components/MainPageLayoutContainer";
 import { RoomPhase, SceneDefinition } from "white-web-sdk";
 import { useTranslation } from "react-i18next";
+import { RequestErrorCode } from "../../constants/ErrorCode";
+import { ServerRequestError } from "../../utils/error/ServerRequestError";
 
 export interface CloudStoragePageProps {
     compact?: boolean;
@@ -94,6 +97,7 @@ export const CloudStoragePage = observer<CloudStoragePageProps>(function CloudSt
             return;
         }
 
+        // shrink the image a little to fit the screen
         const maxWidth = window.innerWidth * 0.8;
         const maxHeight = window.innerHeight * 0.8;
 
@@ -120,8 +124,7 @@ export const CloudStoragePage = observer<CloudStoragePageProps>(function CloudSt
         const uuid = v4uuid();
         room.insertImage({
             uuid,
-            centerX: 0,
-            centerY: 0,
+            ...room.state.cameraState,
             width: Math.floor(width * scale),
             height: Math.floor(height * scale),
             locked: false,
@@ -135,14 +138,13 @@ export const CloudStoragePage = observer<CloudStoragePageProps>(function CloudSt
             return;
         }
 
-        room.insertPlugin("audio", {
+        room.insertPlugin("video.js", {
             originX: -240,
             originY: -43,
             width: 480,
             height: 86,
             attributes: { src: file.fileURL },
         });
-        console.log("[cloud storage] does not support audio yet");
     }
 
     function insertVideo(file: CloudStorageFile): void {
@@ -151,7 +153,7 @@ export const CloudStoragePage = observer<CloudStoragePageProps>(function CloudSt
             return;
         }
 
-        room.insertPlugin("video", {
+        room.insertPlugin("video.js", {
             originX: -240,
             originY: -135,
             width: 480,
@@ -166,16 +168,30 @@ export const CloudStoragePage = observer<CloudStoragePageProps>(function CloudSt
             return;
         }
 
-        const { taskUUID, taskToken } = file;
+        const { taskUUID, taskToken, region } = file;
         const dynamic = ext === ".pptx";
-        const convertingStatus = await queryConvertingTaskStatus({ taskUUID, taskToken, dynamic });
+        const convertingStatus = await queryConvertingTaskStatus({
+            taskUUID,
+            taskToken,
+            dynamic,
+            region,
+        });
 
         if (file.convert !== "success") {
             if (convertingStatus.status === "Finished" || convertingStatus.status === "Fail") {
                 try {
-                    await convertFinish({ fileUUID: file.fileUUID });
+                    await convertFinish({ fileUUID: file.fileUUID, region });
                 } catch (e) {
-                    console.error(e);
+                    if (
+                        e instanceof ServerRequestError &&
+                        e.errorCode === RequestErrorCode.FileIsConverted
+                    ) {
+                        // ignore this error
+                        // there's another `convertFinish()` call in ./store.tsx
+                        // we call this api in two places to make sure the file is correctly converted (in server)
+                    } else {
+                        console.error(e);
+                    }
                 }
                 if (convertingStatus.status === "Fail") {
                     void message.error(

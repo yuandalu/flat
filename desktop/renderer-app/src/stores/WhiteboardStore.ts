@@ -1,3 +1,5 @@
+import "video.js/dist/video-js.css";
+
 import { makeAutoObservable, observable, runInAction } from "mobx";
 import {
     createPlugins,
@@ -9,12 +11,17 @@ import {
     ViewMode,
     WhiteWebSdk,
 } from "white-web-sdk";
-import { videoPlugin } from "@netless/white-video-plugin";
-import { audioPlugin } from "@netless/white-audio-plugin";
+import {
+    PluginId as VideoJsPluginId,
+    videoJsPlugin,
+    PluginContext as VideoJsPluginContext,
+} from "@netless/video-js-plugin";
 import { CursorTool } from "@netless/cursor-tool";
 import { NETLESS, NODE_ENV } from "../constants/Process";
 import { globalStore } from "./GlobalStore";
 import { isMobile, isWindows } from "react-device-detect";
+import { getCoursewarePreloader } from "../utils/CoursewarePreloader";
+import { debounce } from "lodash-es";
 
 export class WhiteboardStore {
     public room: Room | null = null;
@@ -32,8 +39,9 @@ export class WhiteboardStore {
         this.isCreator = config.isCreator;
         this.isWritable = config.isCreator;
 
-        makeAutoObservable(this, {
+        makeAutoObservable<this, "preloadPPTResource">(this, {
             room: observable.ref,
+            preloadPPTResource: false,
         });
     }
 
@@ -79,6 +87,10 @@ export class WhiteboardStore {
         this.isShowPreviewPanel = show;
     };
 
+    private preloadPPTResource = debounce(async (pptSrc: string): Promise<void> => {
+        await getCoursewarePreloader().preload(pptSrc);
+    }, 2000);
+
     public async joinWhiteboardRoom(): Promise<void> {
         if (!globalStore.userUUID) {
             throw new Error("Missing userUUID");
@@ -88,10 +100,9 @@ export class WhiteboardStore {
             throw new Error("Missing Whiteboard UUID and Token");
         }
 
-        const plugins = createPlugins({ video: videoPlugin, audio: audioPlugin });
-        const contextIdentity = this.isCreator ? "host" : "";
-        plugins.setPluginContext("video", { identity: contextIdentity });
-        plugins.setPluginContext("audio", { identity: contextIdentity });
+        const plugins = createPlugins({ [VideoJsPluginId]: videoJsPlugin() });
+        const videoJsPluginContext: Partial<VideoJsPluginContext> = { enable: true, verbose: true };
+        plugins.setPluginContext(VideoJsPluginId, videoJsPluginContext);
 
         let deviceType: DeviceType;
         if (isWindows) {
@@ -120,6 +131,7 @@ export class WhiteboardStore {
                 uuid: globalStore.whiteboardRoomUUID,
                 roomToken: globalStore.whiteboardRoomToken,
                 cursorAdapter: cursorAdapter,
+                region: globalStore.region ?? undefined,
                 userPayload: {
                     userId: globalStore.userUUID,
                     cursorName,
@@ -145,12 +157,27 @@ export class WhiteboardStore {
                 onPhaseChanged: phase => {
                     this.updatePhase(phase);
                 },
-                onRoomStateChanged: (modifyState: Partial<RoomState>): void => {
+                onRoomStateChanged: async (modifyState: Partial<RoomState>): Promise<void> => {
                     if (modifyState.broadcastState) {
                         this.updateViewMode(modifyState.broadcastState.mode);
                     }
+
+                    // TODO: That is temporarily plan, use RTM emit message is follow-up plan.
+                    try {
+                        const pptSrc = modifyState.sceneState?.scenes[0]?.ppt?.src;
+                        if (pptSrc) {
+                            try {
+                                await this.preloadPPTResource(pptSrc);
+                            } catch (err) {
+                                console.log(err);
+                            }
+                        }
+                    } catch (err) {
+                        console.log(err);
+                    }
                 },
                 onDisconnectWithError: error => {
+                    this.preloadPPTResource.cancel();
                     console.error(error);
                 },
                 onKickedWithReason: reason => {
@@ -202,6 +229,7 @@ export class WhiteboardStore {
 
     public destroy(): void {
         if (this.room) {
+            this.preloadPPTResource.cancel();
             this.room.callbacks.off();
         }
         if (NODE_ENV === "development") {
